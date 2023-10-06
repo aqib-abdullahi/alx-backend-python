@@ -4,7 +4,7 @@
 import math
 
 
-def floor(n: float) -> float:
+def floor(n: float) -> int:
     """floars an argument passsed
     """
     return math.floor(n)
