@@ -2,6 +2,7 @@
 """Task 0
 """
 
+
 def add(a: float, b: float) -> float:
     """adds two floats
     """
