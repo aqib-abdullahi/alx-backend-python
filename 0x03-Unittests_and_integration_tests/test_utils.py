@@ -16,7 +16,7 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
-    def test_Access_nested_map(self,
+    def test_access_nested_map(self,
                                nested_map: Dict,
                                path: Tuple[str],
                                expected: Union[Dict, int]
