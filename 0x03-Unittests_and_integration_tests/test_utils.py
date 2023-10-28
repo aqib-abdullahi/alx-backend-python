@@ -7,6 +7,7 @@ import unittest
 from utils import access_nested_map
 from typing import Dict, Union, Tuple
 
+
 class TestAccessNestedMap(unittest.TestCase):
     """Test casses for the logics of accessing
     the nested map functions
@@ -31,16 +32,14 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": 1}, ("a", "b"), KeyError),
     ])
     def test_access_nested_map_exception(self,
-                               nested_map: Dict,
-                               path: Tuple[str],
-                               expected: Exception
-                               ) -> None:
+                                         nested_map: Dict,
+                                         path: Tuple[str],
+                                         expected: Exception
+                                         ) -> None:
         """tests the nested map function with parameters
         with parameters from parameterized
         tests that a KeyError is raised for wrong or invalid arguments
         """
-        # self.assertEqual(access_nested_map(nested_map, path), expected)
-        # self.assertRaises(self, KeyError, access_nested_map(nested_map, path), expected)
         with self.assertRaises(expected):
             access_nested_map(nested_map, path)
 
