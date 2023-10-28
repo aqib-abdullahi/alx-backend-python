@@ -3,7 +3,7 @@
 """
 from parameterized import parameterized
 import unittest
-from unittest.mock import patch, Mock, PropertyMock
+from unittest.mock import patch, Mock, PropertyMock, MagicMock
 from utils import access_nested_map, get_json, memoize
 from typing import Dict, Union, Tuple
 import client
@@ -40,6 +40,28 @@ class TestGithubOrgClient(unittest.TestCase):
                    return_value=repos_url_dict) as mock_org:
             self.assertEqual(GithubOrgClient('abc')._public_repos_url,
                              'https://api.github.com/users/abc/repos')
+
+    # @patch('client.get_json', return_value={'name': 'Repo'})
+    @patch('client.get_json')
+    def test_public_repos(self, mock_get_json: MagicMock) -> None:
+        """Tests the GithubOrgClient.public_repos
+        method
+        """
+        test_payload = {
+            'repo': [
+                {'name': 'Ultimate repository'}
+            ]
+        }
+        mock_get_json.return_value = test_payload['repo']
+        with patch('client.GithubOrgClient._public_repos_url',
+                   new_callable=PropertyMock,
+                   return_value=test_payload['repo']
+                   ) as mock_public_repos_url:
+            client_repo = GithubOrgClient('abc').public_repos()
+            # repos = client.public_repos()
+            self.assertEqual(client_repo, ["Ultimate repository"])
+            mock_public_repos_url.assert_called_once()
+        mock_get_json.assert_called_once()
 
 
 if __name__ == "__main__":
