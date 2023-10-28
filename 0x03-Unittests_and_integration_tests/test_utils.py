@@ -5,7 +5,7 @@ utils.py
 from parameterized import parameterized
 import unittest
 from unittest.mock import patch, Mock
-from utils import access_nested_map, get_json
+from utils import access_nested_map, get_json, memoize
 from typing import Dict, Union, Tuple
 
 
@@ -65,6 +65,35 @@ class TestGetJson(unittest.TestCase):
             result = get_json(test_url)
             self.assertEqual(result, test_payload)
             mock_get.assert_called_once_with(test_url)
+
+
+class TestMemoize(unittest.TestCase):
+    """tests the memoization of functions
+    """
+    def test_memoize(self) -> None:
+        """test memoize
+        """
+
+        class TestClass:
+            """TestClass class
+            """
+
+            def a_method(self):
+                return 42
+
+            @memoize
+            def a_property(self):
+                return self.a_method()
+
+        test_instance = TestClass()
+        with patch.object(test_instance,
+                          'a_method',
+                          return_value=lambda: 42,) as mock_a_method:
+            first_result = test_instance.a_property()
+            second_result = test_instance.a_property()
+            self.assertEqual(first_result, 42)
+            self.assertEqual(second_result, 42)
+            mock_a_method.assert_called_once()
 
 
 if __name__ == "__main__":
