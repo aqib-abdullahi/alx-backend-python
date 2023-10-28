@@ -41,7 +41,6 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(GithubOrgClient('abc')._public_repos_url,
                              'https://api.github.com/users/abc/repos')
 
-    # @patch('client.get_json', return_value={'name': 'Repo'})
     @patch('client.get_json')
     def test_public_repos(self, mock_get_json: MagicMock) -> None:
         """Tests the GithubOrgClient.public_repos
@@ -58,10 +57,23 @@ class TestGithubOrgClient(unittest.TestCase):
                    return_value=test_payload['repo']
                    ) as mock_public_repos_url:
             client_repo = GithubOrgClient('abc').public_repos()
-            # repos = client.public_repos()
             self.assertEqual(client_repo, ["Ultimate repository"])
             mock_public_repos_url.assert_called_once()
         mock_get_json.assert_called_once()
+
+    @parameterized.expand([
+        ({"license": {"key": "my_license"}}, "my_license", True),
+        ({"license": {"key": "other_license"}}, "my_license", False)
+    ])
+    def test_has_license(self, repository: Dict,
+                         license_key: str,
+                         expected: bool) -> bool:
+        """tests GithubOrgClient.has_license
+        method
+        """
+        client = GithubOrgClient('abc')
+        result = client.has_license(repository, license_key)
+        self.assertEqual(result, expected)
 
 
 if __name__ == "__main__":
