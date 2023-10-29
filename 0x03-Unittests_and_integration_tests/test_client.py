@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """test client module
 """
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 import unittest
 from unittest.mock import patch, Mock, PropertyMock, MagicMock
 from utils import access_nested_map, get_json, memoize
 from typing import Dict, Union, Tuple
 import client
 from client import GithubOrgClient
+from requests import HTTPError
+from fixtures import TEST_PAYLOAD
 GithubOrgClient = __import__('client').GithubOrgClient
 
 
@@ -67,13 +69,51 @@ class TestGithubOrgClient(unittest.TestCase):
     ])
     def test_has_license(self, repository: Dict,
                          license_key: str,
-                         expected: bool) -> bool:
+                         expected: bool) -> None:
         """tests GithubOrgClient.has_license
         method
         """
         client = GithubOrgClient('abc')
         result = client.has_license(repository, license_key)
         self.assertEqual(result, expected)
+
+
+@parameterized_class([
+    {
+        'org_payload': TEST_PAYLOAD[0][0],
+        'repos_payload': TEST_PAYLOAD[0][1],
+        'expected_reops': TEST_PAYLOAD[0][2],
+        'apache2_repos': TEST_PAYLOAD[0][3],
+    }
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Tests GibthubOrgClient.public_repos
+    mocking only codes that sends external requests
+    """
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Sets up class fixtures
+        """
+        route_payload = {
+            'https://api.github.com/orgs/google': cls.org_payload,
+            'https://api.github.com/orgs/google/repos': cls.repos_payload,
+        }
+
+        def get_payload(url):
+            """get_payload
+            """
+            if url in route_payload:
+                return Mock(**{'json.return_value': route_payload[url]})
+            return HTTPError
+
+        cls.get_patcher = patch('requests.get', side_effect=get_payload)
+        cls.get_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """removes class fixtures after all tests
+        """
+        cls.get_patcher.stop()
 
 
 if __name__ == "__main__":
